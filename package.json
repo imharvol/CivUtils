@@ -1,0 +1,11 @@
+{
+  "name": "civutils",
+  "version": "1.0.0",
+  "description": "",
+  "main": "civ-utils.js",
+  "scripts": {
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
