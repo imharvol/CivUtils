@@ -1,6 +1,13 @@
 const { once } = require('events')
 const vec3 = require('vec3')
 
+const cardinalOffsets = {
+  north: vec3(0, 0, -1),
+  east: vec3(1, 0, 0),
+  south: vec3(0, 0, 1),
+  west: vec3(-1, 0, 0)
+}
+
 function inject (bot, option) {
   bot.civUtils = {}
 
@@ -86,7 +93,6 @@ function inject (bot, option) {
   // TODO: Check what happens if the bot has armor
   bot.civUtils.dropAllItems = async (exceptions = {}) => {
     for (const item of bot.inventory.items()) {
-      console.log(item)
       if (exceptions[item.type] == null) {
         await bot.tossStack(item)
       } else {
@@ -95,6 +101,13 @@ function inject (bot, option) {
         if (tossCount > 0) await bot.toss(item.type, null, tossCount)
       }
     }
+  }
+
+  bot.civUtils.lookAtCardinal = async (cardinal) => {
+    const offset = cardinalOffsets[cardinal]
+    if (offset == null) throw new Error(`The cardinal doesn't exist: ${cardinal}`)
+
+    await bot.lookAt(bot.entity.position.plus(offset).offset(0, bot.entity.height, 0))
   }
 }
 

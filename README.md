@@ -55,3 +55,7 @@ bot.civUtils.dropAllItems({
   '9': 64 // 9 is the id for dirt
 })
 ```
+### bot.civUtils.lookAtCardinal(cardinal)
+Looks straight to a cardinal direction. Returns a `Promise` that is resolved once it's done.
+- `cardinal` - String of the cardinal we want to look at: north, east, south and west.
+This function is usually useful with `bot.civUtils.dropAllItems([exceptions])`.
