@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "civ-utils.js",
-  "scripts": {
-  },
+  "scripts": {},
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "vec3": "^0.1.7"
+  }
 }
