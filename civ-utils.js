@@ -20,7 +20,7 @@ function inject (bot, option) {
     const targetPos = pos.clone().offset(0.5, 0, 0.5)
 
     while (bot.entity.position.distanceSquared(targetPos) > minDistanceSq) {
-      await bot.lookAt(targetPos)
+      bot.lookAt(targetPos)
       bot.setControlState('forward', true)
 
       await once(bot, 'physicsTick')
@@ -108,6 +108,29 @@ function inject (bot, option) {
     if (offset == null) throw new Error(`The cardinal doesn't exist: ${cardinal}`)
 
     await bot.lookAt(bot.entity.position.plus(offset).offset(0, bot.entity.height, 0))
+  }
+
+  bot.civUtils.mantainItems = async (chestPos, items = {}) => {
+    if (chestPos == null) throw new Error("chestPos can't be null")
+
+    const chestBlock = bot.blockAt(chestPos)
+
+    if (!['chest', 'trapped_chest'].includes(chestBlock?.name)) { throw new Error(`mantainItems has to receive a chest position as argument. Current value of the block: ${chestBlock}`) }
+
+    await bot.lookAt(chestPos)
+    const chest = await bot.openChest(chestBlock)
+
+    for (let itemId of Object.keys(items)) {
+      itemId = parseInt(itemId)
+      const itemCount = items[itemId]
+
+      const withdrawCount = itemCount - bot.inventory.count(itemId)
+      if (withdrawCount <= 0) continue
+
+      await chest.withdraw(itemId, null, withdrawCount)
+    }
+
+    await chest.close()
   }
 }
 
