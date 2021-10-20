@@ -82,6 +82,20 @@ function inject (bot, option) {
       await bot.civUtils.sleep(200) // For some reason if you don't wait a bit, it takes much longer to dig the block
     }
   }
+
+  // TODO: Check what happens if the bot has armor
+  bot.civUtils.dropAllItems = async (exceptions = {}) => {
+    for (const item of bot.inventory.items()) {
+      console.log(item)
+      if (exceptions[item.type] == null) {
+        await bot.tossStack(item)
+      } else {
+        if (exceptions[item.type] === 0) continue
+        const tossCount = bot.inventory.count(item.type) - exceptions[item.type]
+        if (tossCount > 0) await bot.toss(item.type, null, tossCount)
+      }
+    }
+  }
 }
 
 module.exports = inject

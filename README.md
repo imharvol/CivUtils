@@ -44,3 +44,14 @@ Orders the bot to go to a `targetY` making a tower under himself. Returns a `Pro
 Orders the bot to go to a `targetY` by digging under himself. Returns a `Promise` that resolves once the bot reaches the desired `targetY`.
 - `targetY` - y cordinate we want the bot to reach
 - `tools` - Optional array with the ids of the tols that the bot should use to dig. If not specified it will use whatever item it has on its hand.
+
+### bot.civUtils.dropAllItems([exceptions])
+Drops all items into the ground except the ones in exceptions. Returns a `Promise` that is resolved once it's done.
+- `exceptions` - Optional object that says which (key) and how many (value) of a item we want to keep.
+Por example, the following code will drop everything except 5 iron_pickaxes and 64 of dirt.
+```js
+bot.civUtils.dropAllItems({
+  '600': 5, // 600 is the id for iron_pickaxe
+  '9': 64 // 9 is the id for dirt
+})
+```
