@@ -46,7 +46,7 @@ function inject (bot, option) {
         const referenceBlock = bot.blockAt(referenceBlockPos)
 
         // Equip a building block
-        bot.civUtils.equipHand(buildingBlocks)
+        await bot.civUtils.equipHand(buildingBlocks)
 
         try { // Sometimes placeBlock does fail, maybe because of delay? so we might have to try multiple times
           await bot.placeBlock(referenceBlock, vec3(0, 1, 0))
