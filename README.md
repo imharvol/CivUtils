@@ -70,3 +70,7 @@ bot.civUtils.mantainItems(vec3(100, 50, 100), {
   '600': 5 // 600 is the id for iron_pickaxe
 }})
 ```
+
+### bot.civUtils.equipHand(itemIds)
+Equips an item out of a list of item ids. Returns a `Promise` that is resolved once it's done.
+- `itemIds` - A item id of a list of item ids of possible objects that we want the bot to equip.

@@ -36,30 +36,24 @@ function inject (bot, option) {
     const initialY = Math.floor(bot.entity.position.y)
     if (targetY < initialY) throw new Error('The bot is above the targetY')
 
+    await bot.lookAt(bot.entity.position.floored().offset(0, -1, 0)) // Look down
     for (let y = initialY; y < targetY;) { // y represents where we want to place the next block
-      await bot.look(bot.entity.yaw, -90) // Look down
       bot.setControlState('jump', true) // Jump continuously
 
       // Check if we are above the block where we want to place the block
-      if (Math.floor(bot.entity.position.y) >= y + 1) {
+      if (bot.entity.position.y >= y + 1) {
         const referenceBlockPos = vec3(bot.entity.position.x, y - 1, bot.entity.position.z).floored()
         const referenceBlock = bot.blockAt(referenceBlockPos)
 
         // Equip a building block
-        for (const buildingBlock of buildingBlocks) {
-          if (bot.inventory.count(buildingBlock) > 0) {
-            await bot.equip(buildingBlock, 'hand')
-            break
-          }
-        }
+        bot.civUtils.equipHand(buildingBlocks)
 
         try { // Sometimes placeBlock does fail, maybe because of delay? so we might have to try multiple times
           await bot.placeBlock(referenceBlock, vec3(0, 1, 0))
           y++
         } catch (err) {}
-      } else {
-        await once(bot, 'physicsTick')
       }
+      await once(bot, 'physicsTick')
     }
     bot.setControlState('jump', false)
   }
@@ -73,24 +67,20 @@ function inject (bot, option) {
       const blockPos = vec3(bot.entity.position.x, y - 1, bot.entity.position.z).floored()
       const block = bot.blockAt(blockPos)
 
-      for (const tool of tools) {
-        if (bot.inventory.count(tool) > 0) {
-          await bot.equip(tool, 'hand')
-          break
-        }
-      }
+      bot.civUtils.equipHand(tools)
 
       try {
         await bot.dig(block)
+        await once(bot, `blockUpdate:${blockPos}`)
+        await bot.civUtils.sleep(500)
         y--
-      } catch (err) {}
-
-      await once(bot, `blockUpdate:${blockPos}`)
-      await bot.civUtils.sleep(200) // For some reason if you don't wait a bit, it takes much longer to dig the block
+      } catch (err) {
+        await once(bot, 'physicsTick')
+      }
     }
   }
 
-  // TODO: Check what happens if the bot has armor
+  // TODO: Check what happens if the bot has armor (I think he wouldn't drop the armor because .items() doesn't return armor slots)
   bot.civUtils.dropAllItems = async (exceptions = {}) => {
     for (const item of bot.inventory.items()) {
       if (exceptions[item.type] == null) {
@@ -131,6 +121,19 @@ function inject (bot, option) {
     }
 
     await chest.close()
+  }
+
+  bot.civUtils.equipHand = async (itemIds) => {
+    if (typeof itemIds === 'number') itemIds = [itemIds]
+
+    if (itemIds.includes(bot.heldItem?.type)) return
+
+    for (const itemId of itemIds) {
+      if (bot.inventory.count(itemId) > 0) {
+        await bot.equip(itemId)
+        break
+      }
+    }
   }
 }
 
