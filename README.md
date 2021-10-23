@@ -73,4 +73,8 @@ bot.civUtils.mantainItems(vec3(100, 50, 100), {
 
 ### bot.civUtils.equipHand(itemIds)
 Equips an item out of a list of item ids. Returns a `Promise` that is resolved once it's done.
-- `itemIds` - A item id of a list of item ids of possible objects that we want the bot to equip.
+- `itemIds` - A item or of a list of item ids of possible objects that we want the bot to equip.
+
+### bot.civUtils.eat(itemIds)
+Eats items from a item id list untill food is full. Returns a `Promise` that is resolved once it's done.
+`itemIds` - A item id or a list of item ids of possible food that we want the bot to eat.

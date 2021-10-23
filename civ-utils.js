@@ -139,6 +139,14 @@ function inject (bot, option) {
       }
     }
   }
+
+  bot.civUtils.eat = async (itemIds) => {
+    while (bot.food < 20) {
+      console.log('eating')
+      await bot.civUtils.equipHand(itemIds)
+      await bot.consume()
+    }
+  }
 }
 
 module.exports = inject
