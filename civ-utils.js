@@ -33,8 +33,12 @@ function inject (bot, option) {
     if (buildingBlocks.length === 0) throw new Error('goUp should receive at least one building block')
 
     targetY = Math.floor(targetY)
-    const initialY = Math.floor(bot.entity.position.y)
-    if (targetY < initialY) throw new Error('The bot is above the targetY')
+    let initialY = bot.entity.position.y
+    do {
+      initialY = bot.entity.position.y
+      await once(bot, 'physicsTick')
+    } while (bot.entity.position.y !== initialY)
+    if (initialY > targetY) throw new Error('The bot is above the targetY')
 
     await bot.lookAt(bot.entity.position.floored().offset(0, -1, 0)) // Look down
     for (let y = initialY; y < targetY;) { // y represents where we want to place the next block
