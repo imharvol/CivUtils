@@ -32,14 +32,16 @@ function inject (bot, option) {
   bot.civUtils.goUp = async (targetY, buildingBlocks = []) => {
     if (buildingBlocks.length === 0) throw new Error('goUp should receive at least one building block')
 
+    const initialPos = bot.entity.position.floored()
     targetY = Math.floor(targetY)
-    let initialY = bot.entity.position.y
+    let initialY = initialPos.y
     do {
       initialY = bot.entity.position.y
       await once(bot, 'physicsTick')
     } while (bot.entity.position.y !== initialY)
     if (initialY > targetY) throw new Error('The bot is above the targetY')
 
+    await bot.civUtils.goTo(vec3(initialPos.x, bot.entity.position.y, initialPos.z))
     await bot.lookAt(bot.entity.position.floored().offset(0, -1, 0)) // Look down
     for (let y = initialY; y < targetY;) { // y represents where we want to place the next block
       bot.setControlState('jump', true) // Jump continuously
