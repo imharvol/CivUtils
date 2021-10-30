@@ -16,8 +16,8 @@ function inject (bot, option) {
   }
 
   bot.civUtils.goTo = async (pos) => {
-    const minDistanceSq = 0.2 * 0.2
-    const targetPos = pos.clone().offset(0.5, 0, 0.5)
+    const minDistanceSq = 0.1 * 0.1
+    const targetPos = pos.floored().offset(0.5, 0, 0.5)
 
     while (bot.entity.position.distanceSquared(targetPos) > minDistanceSq) {
       bot.lookAt(targetPos)
@@ -94,7 +94,10 @@ function inject (bot, option) {
       } else {
         if (exceptions[item.type] === 0) continue
         const tossCount = bot.inventory.count(item.type) - exceptions[item.type]
-        if (tossCount > 0) await bot.toss(item.type, null, tossCount)
+        if (tossCount > 0) {
+          await bot.toss(item.type, null, tossCount)
+          await bot.civUtils.sleep(2000) // Give some time to the server to update the inventory
+        }
       }
     }
   }
@@ -144,7 +147,6 @@ function inject (bot, option) {
 
   bot.civUtils.eat = async (itemIds) => {
     while (bot.food < 20) {
-      console.log('eating')
       await bot.civUtils.equipHand(itemIds)
       await bot.consume()
     }
