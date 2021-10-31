@@ -16,7 +16,7 @@ function inject (bot, option) {
   }
 
   bot.civUtils.goTo = async (pos) => {
-    const minDistanceSq = 0.1 * 0.1
+    const minDistanceSq = 0.2 * 0.2
     const targetPos = pos.floored().offset(0.5, 0, 0.5)
 
     while (bot.entity.position.distanceSquared(targetPos) > minDistanceSq) {
@@ -32,36 +32,39 @@ function inject (bot, option) {
   bot.civUtils.goUp = async (targetY, buildingBlocks = []) => {
     if (buildingBlocks.length === 0) throw new Error('goUp should receive at least one building block')
 
-    const initialPos = bot.entity.position.floored()
-    targetY = Math.floor(targetY)
-    let initialY = initialPos.y
-    do {
-      initialY = bot.entity.position.y
-      await once(bot, 'physicsTick')
-    } while (bot.entity.position.y !== initialY)
-    if (initialY > targetY) throw new Error('The bot is above the targetY')
-
-    await bot.civUtils.goTo(vec3(initialPos.x, bot.entity.position.y, initialPos.z))
-    await bot.lookAt(bot.entity.position.floored().offset(0, -1, 0)) // Look down
-    for (let y = initialY; y < targetY;) { // y represents where we want to place the next block
-      bot.setControlState('jump', true) // Jump continuously
-
-      // Check if we are above the block where we want to place the block
-      if (bot.entity.position.y >= y + 1) {
-        const referenceBlockPos = vec3(bot.entity.position.x, y - 1, bot.entity.position.z).floored()
-        const referenceBlock = bot.blockAt(referenceBlockPos)
-
-        // Equip a building block
-        await bot.civUtils.equipHand(buildingBlocks)
-
-        try { // Sometimes placeBlock does fail, maybe because of delay? so we might have to try multiple times
-          await bot.placeBlock(referenceBlock, vec3(0, 1, 0))
-          y++
-        } catch (err) {}
-      }
-      await once(bot, 'physicsTick')
+    const waitToFall = async () => {
+      let initialY
+      do {
+        initialY = bot.entity.position.y
+        await once(bot, 'physicsTick')
+      } while (bot.entity.position.y !== initialY)
     }
-    bot.setControlState('jump', false)
+
+    await bot.lookAt(bot.entity.position.floored().offset(0, -1, 0)) // Look down
+
+    while (Math.floor(bot.entity.position.y) < Math.floor(targetY)) {
+      await waitToFall()
+
+      // Go to the center of the block
+      await bot.civUtils.goTo(bot.entity.position.floored())
+      await bot.civUtils.sleep(200)
+
+      // Equip a building block
+      await bot.civUtils.equipHand(buildingBlocks)
+
+      const referenceBlockPos = bot.entity.position.floored().offset(0, -1, 0)
+      const referenceBlock = bot.blockAt(referenceBlockPos)
+
+      bot.setControlState('jump', true)
+
+      while (Math.floor(bot.entity.position.y) < referenceBlockPos.y + 2) await once(bot, 'physicsTick')
+
+      try { // Sometimes placeBlock does fail, maybe because of delay? so we might have to try multiple times
+        await bot.placeBlock(referenceBlock, vec3(0, 1, 0))
+      } catch (err) {}
+
+      bot.setControlState('jump', false)
+    }
   }
 
   bot.civUtils.goDown = async (targetY, tools = []) => {
